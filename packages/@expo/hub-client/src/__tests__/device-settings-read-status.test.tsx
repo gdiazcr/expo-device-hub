@@ -42,6 +42,7 @@ const ANDROID_RESPONSES: Record<string, object> = {
   "/api/font-weight": { ok: true, fontWeight: { enabled: false } },
   "/api/high-text-contrast": { ok: true, highTextContrast: { enabled: false } },
   "/api/software-keyboard": { ok: true, softwareKeyboard: { enabled: true } },
+  "/api/talkback": { ok: true, talkBack: { installed: true, enabled: false, raw: "null" } },
 };
 
 const { stubGlobal, restoreGlobals } = createGlobalStubs();

@@ -249,6 +249,45 @@ describe("Android device setting contract", () => {
   });
 });
 
+describe("Android TalkBack setting", () => {
+  test("toggles TalkBack through its own endpoint", () => {
+    expect(androidDeviceSettingRequest("talkback", "on")).toEqual({
+      path: "/api/talkback",
+      body: { enabled: true },
+    });
+    expect(androidDeviceSettingRequest("talkback", "off")).toEqual({
+      path: "/api/talkback",
+      body: { enabled: false },
+    });
+    expect(androidDeviceSettingRequest("talkback", "unknown")).toBeNull();
+  });
+
+  test("reads an installed TalkBack as on or off", () => {
+    expect(
+      parseAndroidDeviceSetting("talkback", {
+        ok: true,
+        talkBack: { installed: true, enabled: true },
+      }),
+    ).toBe("on");
+    expect(
+      parseAndroidDeviceSetting("talkback", {
+        ok: true,
+        talkBack: { installed: true, enabled: false },
+      }),
+    ).toBe("off");
+  });
+
+  test("hides the switch on images without TalkBack", () => {
+    expect(
+      parseAndroidDeviceSetting("talkback", {
+        ok: true,
+        talkBack: { installed: false, enabled: false },
+      }),
+    ).toBe("unsupported");
+    expect(parseAndroidDeviceSetting("talkback", { ok: true })).toBeNull();
+  });
+});
+
 describe("Android device setting table", () => {
   test("derives the setting keys in table order", () => {
     expect(ANDROID_DEVICE_SETTING_KEYS).toEqual([
@@ -260,6 +299,7 @@ describe("Android device setting table", () => {
       "bold-text",
       "increase-contrast",
       "onscreen-keyboard",
+      "talkback",
     ]);
   });
 
@@ -274,6 +314,7 @@ describe("Android device setting table", () => {
       "bold-text": 0,
       "increase-contrast": 0,
       "onscreen-keyboard": 0,
+      talkback: 0,
     });
     expect(createAndroidDeviceSettingVersions()).not.toBe(versions);
   });

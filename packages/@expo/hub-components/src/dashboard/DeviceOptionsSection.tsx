@@ -25,6 +25,7 @@ const DEFAULT_VALUES: Record<DeviceSettingKey, string> = {
   "show-borders": "off",
   "reduce-transparency": "off",
   voiceover: "off",
+  talkback: "off",
 };
 
 const APPEARANCE_OPTIONS: SelectOption[] = [
@@ -74,13 +75,19 @@ const ANDROID_DISPLAY_SIZE_OPTIONS: SelectOption[] = [
   { value: "extra-large", label: "XL" },
 ];
 
-const SWITCH_OPTIONS: ReadonlyArray<{ key: DeviceSettingKey; label: string }> = [
+const SWITCH_OPTIONS: ReadonlyArray<{
+  key: DeviceSettingKey;
+  label: string;
+  /** Hides the row on the other platform while the first settings read is in flight. */
+  platform?: "ios" | "android";
+}> = [
   { key: "reduce-motion", label: "Reduce motion" },
   { key: "bold-text", label: "Bold text" },
   { key: "increase-contrast", label: "Increase contrast" },
   { key: "show-borders", label: "Show borders" },
   { key: "reduce-transparency", label: "Reduce transparency" },
   { key: "voiceover", label: "VoiceOver" },
+  { key: "talkback", label: "TalkBack", platform: "android" },
 ];
 
 const EMPTY_PENDING_SETTINGS: ReadonlySet<DeviceSettingKey> = new Set();
@@ -218,8 +225,8 @@ export function DeviceOptionsSection({
       )}
 
       {showDeviceSettings &&
-        SWITCH_OPTIONS.map(({ key, label }) =>
-          visible(key) ? (
+        SWITCH_OPTIONS.map(({ key, label, platform: only }) =>
+          visible(key) && (only === undefined || only === platform) ? (
             <SidebarRow key={key} label={label}>
               <SidebarSwitch
                 checked={value(key) === "on"}

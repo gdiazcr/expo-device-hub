@@ -255,6 +255,9 @@ export type ReduceMotionResponse = ApiSuccess<{ reduceMotion: ReduceMotionStatus
 export type HighTextContrastStatus = { enabled: boolean; raw: string };
 export type HighTextContrastResponse = ApiSuccess<{ highTextContrast: HighTextContrastStatus }>;
 
+export type TalkBackStatus = { installed: boolean; enabled: boolean; raw: string };
+export type TalkBackResponse = ApiSuccess<{ talkBack: TalkBackStatus }>;
+
 export type FontWeightStatus = { enabled: boolean; raw: string };
 export type FontWeightResponse = ApiSuccess<{ fontWeight: FontWeightStatus }>;
 
@@ -641,6 +644,10 @@ export type ApiContractMap = {
   "/api/high-text-contrast": {
     GET: EndpointContract<undefined, HighTextContrastResponse>;
     POST: EndpointContract<{ enabled: boolean }, HighTextContrastResponse>;
+  };
+  "/api/talkback": {
+    GET: EndpointContract<undefined, TalkBackResponse>;
+    POST: EndpointContract<{ enabled: boolean }, TalkBackResponse>;
   };
   "/api/font-weight": {
     GET: EndpointContract<undefined, FontWeightResponse>;
@@ -1313,6 +1320,20 @@ export function parseHighTextContrastResponse(value: unknown): HighTextContrastR
   };
 }
 
+export function parseTalkBackResponse(value: unknown): TalkBackResponse {
+  const root = record(value, "talkback response");
+  if (root.ok !== true) fail("talkback response.ok must be true");
+  const status = record(root.talkBack, "talkBack");
+  return {
+    ok: true,
+    talkBack: {
+      installed: boolean(status.installed, "talkBack.installed"),
+      enabled: boolean(status.enabled, "talkBack.enabled"),
+      raw: string(status.raw, "talkBack.raw"),
+    },
+  };
+}
+
 export function parseFontWeightResponse(value: unknown): FontWeightResponse {
   const root = record(value, "font weight response");
   if (root.ok !== true) fail("font weight response.ok must be true");
@@ -1950,6 +1971,7 @@ export const API_SUCCESS_PARSERS = {
     GET: parseHighTextContrastResponse,
     POST: parseHighTextContrastResponse,
   },
+  "/api/talkback": { GET: parseTalkBackResponse, POST: parseTalkBackResponse },
   "/api/font-weight": { GET: parseFontWeightResponse, POST: parseFontWeightResponse },
   "/api/software-keyboard": {
     GET: parseSoftwareKeyboardResponse,

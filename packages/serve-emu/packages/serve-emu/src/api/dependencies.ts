@@ -35,6 +35,7 @@ import type {
   RoutePlaybackSnapshot,
   SessionSnapshot,
   SoftwareKeyboardStatus,
+  TalkBackStatus,
   StreamModeRequest,
   StreamModeResponse,
   StreamEncoderSettingsResponse,
@@ -76,6 +77,8 @@ export type ApiDependencies = {
   setReduceMotion: (enabled: boolean) => Promise<ReduceMotionStatus>;
   getHighTextContrast: () => Promise<HighTextContrastStatus>;
   setHighTextContrast: (enabled: boolean) => Promise<HighTextContrastStatus>;
+  getTalkBack: () => Promise<TalkBackStatus>;
+  setTalkBack: (enabled: boolean) => Promise<TalkBackStatus>;
   getFontWeight: () => Promise<FontWeightStatus>;
   setFontWeight: (enabled: boolean) => Promise<FontWeightStatus>;
   getSoftwareKeyboard: () => Promise<SoftwareKeyboardStatus>;
