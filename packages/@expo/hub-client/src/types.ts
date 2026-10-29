@@ -107,7 +107,8 @@ export type DeviceSettingKey =
   | "onscreen-keyboard"
   | "show-borders"
   | "reduce-transparency"
-  | "voiceover";
+  | "voiceover"
+  | "talkback";
 
 /** Current backend-reported values. Missing keys are unavailable; `unsupported` keys are hidden. */
 export type DeviceSettings = Partial<Record<DeviceSettingKey, string>>;

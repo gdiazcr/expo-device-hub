@@ -10,6 +10,7 @@ export type AndroidDeviceSettingKey = Extract<
   | "bold-text"
   | "increase-contrast"
   | "onscreen-keyboard"
+  | "talkback"
 >;
 
 export type AndroidSizeStep = "small" | "medium" | "large" | "extra-large";
@@ -50,7 +51,8 @@ export type AndroidDeviceSettingPath =
   | "/api/reduce-motion"
   | "/api/font-weight"
   | "/api/high-text-contrast"
-  | "/api/software-keyboard";
+  | "/api/software-keyboard"
+  | "/api/talkback";
 
 export interface AndroidDeviceSettingRequest {
   path: AndroidDeviceSettingPath;
@@ -144,6 +146,15 @@ const ANDROID_DEVICE_SETTINGS: Record<AndroidDeviceSettingKey, AndroidDeviceSett
     path: "/api/software-keyboard",
     encode: enabledBodyForOnOff,
     decode: (data) => onOffForEnabledBody(data.softwareKeyboard),
+  },
+  talkback: {
+    path: "/api/talkback",
+    encode: enabledBodyForOnOff,
+    decode: (data) => {
+      // Images without TalkBack still answer, so the switch hides instead of reading as off.
+      if (asRecord(data.talkBack)?.installed === false) return "unsupported";
+      return onOffForEnabledBody(data.talkBack);
+    },
   },
 };
 

@@ -47,6 +47,8 @@ const EXPECTED_ROUTES = [
   ["POST", "/api/reduce-motion"],
   ["GET", "/api/high-text-contrast"],
   ["POST", "/api/high-text-contrast"],
+  ["GET", "/api/talkback"],
+  ["POST", "/api/talkback"],
   ["GET", "/api/font-weight"],
   ["POST", "/api/font-weight"],
   ["GET", "/api/software-keyboard"],
@@ -115,6 +117,7 @@ const VALID_JSON_BODIES: Readonly<Record<string, unknown>> = {
   "POST /api/network": { enabled: true },
   "POST /api/reduce-motion": { enabled: true },
   "POST /api/high-text-contrast": { enabled: true },
+  "POST /api/talkback": { enabled: true },
   "POST /api/font-weight": { enabled: true },
   "POST /api/software-keyboard": { enabled: true },
   "POST /api/display-density": { scale: 1.1 },
@@ -307,6 +310,12 @@ function fakeDependencies(overrides: Partial<ApiDependencies> = {}): ApiDependen
     setHighTextContrast: async (enabled) => ({
       enabled,
       raw: enabled ? "1" : "0",
+    }),
+    getTalkBack: async () => ({ installed: true, enabled: false, raw: "null" }),
+    setTalkBack: async (enabled) => ({
+      installed: true,
+      enabled,
+      raw: enabled ? "com.google.android.marvin.talkback/.TalkBackService" : "null",
     }),
     getFontWeight: async () => ({ enabled: false, raw: "0" }),
     setFontWeight: async (enabled) => ({ enabled, raw: enabled ? "300" : "0" }),
@@ -501,14 +510,14 @@ const silentLogger: ApiLogger = {
 };
 
 describe("domain API route table", () => {
-  test("registers the exact 64 method/path pairs across 46 paths", () => {
+  test("registers the exact 66 method/path pairs across 47 paths", () => {
     const routes = createApiRoutes();
 
     expect(routes.map(({ method, path }) => [method, path])).toEqual(
       EXPECTED_ROUTES.map(([method, path]) => [method, path]),
     );
-    expect(routes).toHaveLength(64);
-    expect(new Set(routes.map((route) => route.path)).size).toBe(46);
+    expect(routes).toHaveLength(66);
+    expect(new Set(routes.map((route) => route.path)).size).toBe(47);
     const contractPairs = Object.entries(API_SUCCESS_PARSERS).flatMap(([path, methods]) =>
       Object.keys(methods).map((method) => `${method} ${path}`),
     );
@@ -536,12 +545,12 @@ describe("domain API route table", () => {
     expect(invoked).toEqual(EXPECTED_ROUTES.map(([method, path]) => `${method} ${path}`));
   });
 
-  test("returns structured OPTIONS 405 with exact Allow for all 46 paths", async () => {
+  test("returns structured OPTIONS 405 with exact Allow for all 47 paths", async () => {
     const router = createApiRouter(createApiRoutes());
     const deps = fakeDependencies();
     const paths = [...new Set(EXPECTED_ROUTES.map((route) => route[1]))];
 
-    expect(paths).toHaveLength(46);
+    expect(paths).toHaveLength(47);
     for (const path of paths) {
       const response = await router.handle(
         new Request(`${BASE_URL}${path}`, { method: "OPTIONS" }),

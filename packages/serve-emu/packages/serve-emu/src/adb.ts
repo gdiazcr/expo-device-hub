@@ -50,6 +50,13 @@ export type FontWeightStatus = {
   enabled: boolean;
   raw: string;
 };
+export type TalkBackStatus = {
+  /** False on images that ship without TalkBack, where the setting cannot be turned on. */
+  installed: boolean;
+  enabled: boolean;
+  /** `enabled_accessibility_services`, the colon-separated list TalkBack is one entry of. */
+  raw: string;
+};
 export type SoftwareKeyboardStatus = {
   enabled: boolean;
   raw: string;
@@ -524,6 +531,79 @@ export async function setHighTextContrast(
     runExec,
   );
   return getHighTextContrast(serial, runExec);
+}
+
+const TALKBACK_PACKAGE = "com.google.android.marvin.talkback";
+const TALKBACK_SERVICE = `${TALKBACK_PACKAGE}/${TALKBACK_PACKAGE}.TalkBackService`;
+
+/** An unset key reads back as the literal `null`; entries may use the short `pkg/.Class` form. */
+function accessibilityServices(raw: string): string[] {
+  if (raw === "null") return [];
+  return raw.split(":").filter(Boolean);
+}
+
+function isTalkBackService(entry: string): boolean {
+  return entry.startsWith(`${TALKBACK_PACKAGE}/`);
+}
+
+async function talkBackInstalled(
+  serial: string,
+  runExec: typeof execText = execText,
+): Promise<boolean> {
+  // `pm path` exits non-zero for a missing package, which would read the same as adb failing.
+  const r = await runExec(
+    "adb",
+    ["-s", serial, "shell", "pm", "list", "packages", TALKBACK_PACKAGE],
+    { timeout: ADB_QUERY_TIMEOUT_MS },
+  );
+  if (execFailed(r)) {
+    throw new Error(`pm list packages failed: ${execFailure(r)}`, { cause: r.error ?? undefined });
+  }
+  // The filter is a prefix match, so `…talkbackoverlay` comes back too.
+  return r.stdout.split("\n").some((line) => line.trim() === `package:${TALKBACK_PACKAGE}`);
+}
+
+export async function getTalkBack(
+  serial: string,
+  runExec: typeof execText = execText,
+): Promise<TalkBackStatus> {
+  const [installed, raw] = await Promise.all([
+    talkBackInstalled(serial, runExec),
+    secureSetting(serial, "enabled_accessibility_services", runExec),
+  ]);
+  return { installed, enabled: accessibilityServices(raw).some(isTalkBackService), raw };
+}
+
+/** Add or remove TalkBack from the enabled services, leaving any other service in the list. */
+export async function setTalkBack(
+  serial: string,
+  enabled: boolean,
+  runExec: typeof execText = execText,
+): Promise<TalkBackStatus> {
+  const current = await getTalkBack(serial, runExec);
+  if (enabled && !current.installed) {
+    throw new Error("TalkBack is not installed on this device");
+  }
+  const others = accessibilityServices(current.raw).filter((entry) => !isTalkBackService(entry));
+  const next = enabled ? [...others, TALKBACK_SERVICE] : others;
+  if (next.length === 0) {
+    // An empty argument does not survive `adb shell`, so an empty list is deleted instead.
+    await mutateShell(
+      serial,
+      ["settings", "delete", "secure", "enabled_accessibility_services"],
+      runExec,
+    );
+  } else {
+    await mutateShell(
+      serial,
+      ["settings", "put", "secure", "enabled_accessibility_services", next.join(":")],
+      runExec,
+    );
+  }
+  if (enabled) {
+    await mutateShell(serial, ["settings", "put", "secure", "accessibility_enabled", "1"], runExec);
+  }
+  return getTalkBack(serial, runExec);
 }
 
 /** The adjustment Android's own Bold text toggle writes. */
