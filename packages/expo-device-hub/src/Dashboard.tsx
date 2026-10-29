@@ -2,6 +2,7 @@
 
 import "@expo/hub-components/theme.css";
 import "../global.css";
+import "../dracula-theme.css";
 import {
   DeviceScreen,
   displayScreen,
@@ -13,6 +14,7 @@ import {
   EmptyState,
   LogSidebar,
   ResizeHandle,
+  Select,
   ServerConnectionOverlay,
   Sidebar,
   StreamPanel,
@@ -42,6 +44,7 @@ import {
   visibleDevices,
   visibleNewDeviceOptions,
 } from "./dashboard/deviceVisibility";
+import { HUB_THEME_OPTIONS, resolveHubTheme, useHubThemePreference } from "./dashboard/hubTheme";
 import { useColorScheme } from "./dashboard/useColorScheme";
 import { useDeviceLists } from "./dashboard/useDevices";
 import {
@@ -111,14 +114,17 @@ function clampSidebarWidth(width: number, otherWidth: number): number {
  * The single Expo Hub screen, authored as an Expo DOM component (`'use dom'`) so
  * it renders with web primitives and real CSS. Left: simulators + emulators.
  * Center: the stream of the selected device. Right: the output (logs) for
- * that device. Hub's own dark mode follows the system setting via `dark-theme`;
- * the stream's Theme control flips the *device's* appearance, not Hub's.
+ * that device. Hub's own theme follows the system setting unless the select in
+ * the left sidebar pins one (see `dashboard/hubTheme.ts`); the stream's Theme
+ * control flips the *device's* appearance, not Hub's.
  *
  * Sidebars dock whenever their measured widths leave enough room for the stream
  * and become toggleable overlays otherwise.
  */
 export default function Dashboard(_props: { dom?: import("expo/dom").DOMProps }) {
-  const scheme = useColorScheme();
+  const systemScheme = useColorScheme();
+  const [themePreference, setThemePreference] = useHubThemePreference();
+  const theme = resolveHubTheme(themePreference, systemScheme);
   const singleDevice = dashboardSingleDevice();
   const hideBootDevice = !!singleDevice || dashboardHideBootDevice();
   const platform = dashboardPlatformFilter();
@@ -268,12 +274,14 @@ export default function Dashboard(_props: { dom?: import("expo/dom").DOMProps })
 
   // Mirror the theme onto the document root so Radix portals (e.g. the dropdown
   // menu), which mount on document.body outside the wrapper below, still pick up
-  // the dark `--expo-theme-*` variables.
+  // the theme's `--expo-theme-*` variables.
+  const themeClassName = theme.classNames.join(" ");
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle("dark-theme", scheme === "dark");
-    return () => root.classList.remove("dark-theme");
-  }, [scheme]);
+    const classNames = themeClassName.split(" ");
+    root.classList.add(...classNames);
+    return () => root.classList.remove(...classNames);
+  }, [themeClassName]);
 
   // Keep a valid selection — default to the first device once the list loads.
   // Selecting a device streams it (its helper is attached on demand); the
@@ -312,12 +320,20 @@ export default function Dashboard(_props: { dom?: import("expo/dom").DOMProps })
   const agentDeviceIds = Object.keys(agentInteractions);
 
   const connectionBlocked = connectionStatus !== "connected";
+  const themeSelect = (
+    <Select
+      ariaLabel="Hub theme"
+      value={themePreference}
+      options={HUB_THEME_OPTIONS}
+      onChange={setThemePreference}
+    />
+  );
 
   return (
     <div
       ref={sidebars.containerRef}
       aria-hidden={connectionBlocked || undefined}
-      className={scheme === "dark" ? "dark-theme" : undefined}
+      className={themeClassName}
       inert={connectionBlocked || undefined}
       style={{
         display: "flex",
@@ -353,6 +369,7 @@ export default function Dashboard(_props: { dom?: import("expo/dom").DOMProps })
             onSelect={selectDevice}
             onAddDevice={hideBootDevice ? undefined : handleAddDevice}
             onToggle={sidebars.closeLeft}
+            headerAccessory={themeSelect}
             platform={platform}
             width={sidebarWidth}
           />
@@ -488,6 +505,7 @@ export default function Dashboard(_props: { dom?: import("expo/dom").DOMProps })
             onSelect={selectDevice}
             onAddDevice={hideBootDevice ? undefined : handleAddDevice}
             onToggle={sidebars.closeLeft}
+            headerAccessory={themeSelect}
             platform={platform}
             width={sidebarWidth}
           />

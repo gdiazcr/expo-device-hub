@@ -1,3 +1,5 @@
+import { type ReactNode } from "react";
+
 import { Logo, SidebarToggle, bg } from "../primitives";
 import { DeviceSection } from "./DeviceSection";
 import {
@@ -21,6 +23,7 @@ export function Sidebar({
   onSelect,
   onAddDevice,
   onToggle,
+  headerAccessory,
   platform,
   width = 400,
 }: {
@@ -44,6 +47,8 @@ export function Sidebar({
   onAddDevice?: (target: AddDeviceTarget) => Promise<AddDeviceOutcome>;
   /** When set, a sidebar toggle is shown right-aligned in the logo row. */
   onToggle?: () => void;
+  /** Rendered in the logo row, before the sidebar toggle. */
+  headerAccessory?: ReactNode;
   /** Restrict the sidebar to one platform. Both sections render by default. */
   platform?: Platform;
   /** Column width in px, driven by the resize handle. Defaults to 400. */
@@ -68,7 +73,10 @@ export function Sidebar({
         style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
       >
         <Logo />
-        {onToggle && <SidebarToggle onClick={onToggle} />}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {headerAccessory}
+          {onToggle && <SidebarToggle onClick={onToggle} />}
+        </div>
       </div>
       {platform !== "android" && (
         <DeviceSection
