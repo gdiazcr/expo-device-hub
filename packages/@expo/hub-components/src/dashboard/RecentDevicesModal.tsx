@@ -31,6 +31,7 @@ import {
   type Device,
   type NewDeviceOptions,
   type Platform,
+  deviceLabel,
 } from "./data";
 
 /**
@@ -510,7 +511,7 @@ function RecentRow({
             lineHeight: 1.25,
           }}
         >
-          {device.name}
+          {deviceLabel(device)}
         </span>
         <span
           style={{

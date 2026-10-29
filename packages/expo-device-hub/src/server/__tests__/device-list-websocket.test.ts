@@ -212,6 +212,12 @@ test("deviceListFingerprint includes device-frame capability changes", () => {
   expect(deviceListFingerprint(LIST)).not.toBe(deviceListFingerprint(changed));
 });
 
+test("deviceListFingerprint includes display name changes", () => {
+  const renamed = { ...LIST, emulators: [{ ...ANDROID, displayName: "Titerra Pixel" }] };
+
+  expect(deviceListFingerprint(LIST)).not.toBe(deviceListFingerprint(renamed));
+});
+
 test("deviceListFingerprint compares stable error ids instead of volatile details", () => {
   const error = {
     id: "Error:spawn devicectl ENOENT",

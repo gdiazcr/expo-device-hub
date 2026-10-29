@@ -201,6 +201,7 @@ export function deviceListFingerprint(list: HubDeviceList): string {
           supported,
           deviceFrame,
           lastUsedAt,
+          displayName,
         }) => ({
           id,
           name,
@@ -211,6 +212,7 @@ export function deviceListFingerprint(list: HubDeviceList): string {
           supported,
           deviceFrame,
           lastUsedAt,
+          displayName,
         }),
       )
       .sort((a, b) => a.id.localeCompare(b.id));

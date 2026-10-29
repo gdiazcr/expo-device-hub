@@ -13,10 +13,10 @@ import {
   text,
   textSize,
 } from "../primitives";
-import { type Device } from "./data";
+import { type Device, deviceLabel } from "./data";
 
 export type DeviceTitleProps = {
-  device: Pick<Device, "id" | "name">;
+  device: Pick<Device, "id" | "name" | "displayName">;
   status: ConnectionStatus;
   recording?: DeviceScreenRecordingStatus | null;
 };
@@ -74,7 +74,7 @@ export const DEVICE_TITLE_HEIGHT = BUTTON_HEIGHTS[DEVICE_TITLE_SIZE];
 export function DeviceTitle({ device, status, recording = null }: DeviceTitleProps) {
   const [revealedId, setRevealedId] = useState<string | null>(null);
   const showingId = revealedId === device.id;
-  const label = showingId ? device.id : device.name;
+  const label = showingId ? device.id : deviceLabel(device);
   const appearance = STATUS_APPEARANCE[status];
 
   return (
