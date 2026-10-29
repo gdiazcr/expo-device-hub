@@ -18,6 +18,7 @@ import {
   getDisplayDensity,
   getFontScale,
   getHighTextContrast,
+  getTalkBack,
   getNetworkStatus,
   getNightMode,
   getReduceMotion,
@@ -29,6 +30,7 @@ import {
   setDisplayDensity,
   setFontScale,
   setHighTextContrast,
+  setTalkBack,
   setNetworkEnabled,
   setNightMode,
   setReduceMotion,
@@ -2374,6 +2376,42 @@ export async function startServer(opts: ServerOpts, dependencies: ServerDependen
               ok: true,
               highTextContrast: await runForContext(requestContext, (context) =>
                 setHighTextContrast(context.serial, enabled),
+              ),
+            });
+          } catch (err) {
+            return errorResponse(err);
+          }
+        }
+        return new Response("method not allowed", { status: 405 });
+      }
+
+      if (url.pathname === "/api/talkback") {
+        if (req.method === "GET") {
+          try {
+            return Response.json({
+              ok: true,
+              talkBack: await runForContext(requestContext, (context) =>
+                getTalkBack(context.serial),
+              ),
+            });
+          } catch (err) {
+            return errorResponse(err);
+          }
+        }
+        if (req.method === "POST") {
+          try {
+            const payload = await readJsonBody(req, MAX_JSON_BODY_BYTES, requestContext);
+            if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
+              throw new Error("talkback payload must be an object");
+            }
+            const enabled = (payload as Record<string, unknown>).enabled;
+            if (typeof enabled !== "boolean") {
+              throw new Error("enabled must be a boolean");
+            }
+            return Response.json({
+              ok: true,
+              talkBack: await runForContext(requestContext, (context) =>
+                setTalkBack(context.serial, enabled),
               ),
             });
           } catch (err) {

@@ -13,6 +13,7 @@ import {
   clearHardwareKeyboardCache,
   hardwareKeyboardFromClasses,
   getSoftwareKeyboard,
+  getTalkBack,
   getUserRotation,
   listAllDevices,
   listDevices,
@@ -26,6 +27,7 @@ import {
   setReduceMotion,
   setNightMode,
   setSoftwareKeyboard,
+  setTalkBack,
   setUserRotation,
   shell,
   shellSpawn,
@@ -539,6 +541,84 @@ describe("ADB accessibility controls", () => {
       "settings put secure high_text_contrast_enabled 1",
       "settings get secure high_text_contrast_enabled",
     ]);
+  });
+
+  test("reads TalkBack from the enabled services, short or long form", async () => {
+    const talkBackDevice = (services: string, packages: string) =>
+      (async (_command, args) => {
+        const shell = args.slice(3).join(" ");
+        return result(shell.startsWith("pm list") ? packages : `${services}\n`);
+      }) as typeof execText;
+    const installed =
+      "package:com.google.android.marvin.talkbackoverlay\npackage:com.google.android.marvin.talkback\n";
+
+    await expect(getTalkBack("device-1", talkBackDevice("null", installed))).resolves.toEqual({
+      installed: true,
+      enabled: false,
+      raw: "null",
+    });
+    await expect(
+      getTalkBack(
+        "device-1",
+        talkBackDevice(
+          "com.example/.Other:com.google.android.marvin.talkback/.TalkBackService",
+          installed,
+        ),
+      ),
+    ).resolves.toMatchObject({ installed: true, enabled: true });
+    await expect(
+      getTalkBack(
+        "device-1",
+        talkBackDevice("null", "package:com.google.android.marvin.talkbackoverlay\n"),
+      ),
+    ).resolves.toMatchObject({ installed: false, enabled: false });
+  });
+
+  test("turns TalkBack on and off without dropping other accessibility services", async () => {
+    const calls: string[] = [];
+    let services = "com.example/.Other";
+    const runExec = (async (_command, args) => {
+      const shell = args.slice(3).join(" ");
+      calls.push(shell);
+      if (shell.startsWith("pm list"))
+        return result("package:com.google.android.marvin.talkback\n");
+      if (shell === "settings get secure enabled_accessibility_services")
+        return result(`${services}\n`);
+      if (shell.startsWith("settings put secure enabled_accessibility_services ")) {
+        services = shell.split(" ").at(-1) ?? "";
+      }
+      if (shell === "settings delete secure enabled_accessibility_services") services = "null";
+      return result("");
+    }) as typeof execText;
+
+    await expect(setTalkBack("device-1", true, runExec)).resolves.toMatchObject({ enabled: true });
+    expect(calls).toContain(
+      "settings put secure enabled_accessibility_services com.example/.Other:com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService",
+    );
+    expect(calls).toContain("settings put secure accessibility_enabled 1");
+
+    await expect(setTalkBack("device-1", false, runExec)).resolves.toMatchObject({
+      enabled: false,
+    });
+    expect(services).toBe("com.example/.Other");
+
+    services = "com.google.android.marvin.talkback/.TalkBackService";
+    await expect(setTalkBack("device-1", false, runExec)).resolves.toMatchObject({
+      enabled: false,
+    });
+    expect(calls).toContain("settings delete secure enabled_accessibility_services");
+    expect(services).toBe("null");
+  });
+
+  test("refuses to turn on a TalkBack the image does not ship", async () => {
+    const runExec = (async (_command, args) => {
+      const shell = args.slice(3).join(" ");
+      return result(shell.startsWith("pm list") ? "" : "null\n");
+    }) as typeof execText;
+
+    await expect(setTalkBack("device-1", true, runExec)).rejects.toThrow(
+      "TalkBack is not installed on this device",
+    );
   });
 
   test("writes the font weight adjustment Android's own Bold text toggle uses", async () => {

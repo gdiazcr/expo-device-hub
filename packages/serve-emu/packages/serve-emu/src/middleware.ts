@@ -7,6 +7,7 @@ import {
   getDisplayDensity,
   getFontScale,
   getHighTextContrast,
+  getTalkBack,
   getNetworkStatus,
   getNightMode,
   getReduceMotion,
@@ -19,6 +20,7 @@ import {
   setDisplayDensity,
   setFontScale,
   setHighTextContrast,
+  setTalkBack,
   setNetworkEnabled,
   setNightMode,
   setReduceMotion,
@@ -1436,6 +1438,33 @@ async function createAppInternal(opts: AppOptions, dependencies: CreateAppDepend
             ok: true,
             highTextContrast: await setHighTextContrast(opts.serial, enabled),
           });
+        } catch (err) {
+          return middlewareRequestFailure(err);
+        }
+      }
+      return middlewareFailure("method_not_allowed", 405);
+    }
+
+    if (url.pathname === "/api/talkback") {
+      if (req.method === "GET") {
+        try {
+          return Response.json({ ok: true, talkBack: await getTalkBack(opts.serial) });
+        } catch (err) {
+          return middlewareRequestFailure(err);
+        }
+      }
+      if (req.method === "POST") {
+        if (!isAllowedBrowserOrigin(req, opts)) {
+          return middlewareFailure("forbidden_origin", 403);
+        }
+        try {
+          const payload = await readJsonBody(req);
+          if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
+            throw new Error("talkback payload must be an object");
+          }
+          const enabled = (payload as Record<string, unknown>).enabled;
+          if (typeof enabled !== "boolean") throw new Error("enabled must be a boolean");
+          return Response.json({ ok: true, talkBack: await setTalkBack(opts.serial, enabled) });
         } catch (err) {
           return middlewareRequestFailure(err);
         }

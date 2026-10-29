@@ -267,6 +267,30 @@ export function deviceRoutes(): ContractApiRoute<ApiDependencies>[] {
     },
     {
       method: "GET",
+      path: "/api/talkback",
+      handler: async ({ deps }) =>
+        Response.json({
+          ok: true,
+          talkBack: await downstream("read talkback", deps.getTalkBack),
+        }),
+    },
+    {
+      method: "POST",
+      path: "/api/talkback",
+      handler: async ({ request, deps }) => {
+        const body = await readObject(request, "talkback payload");
+        const enabled = body.enabled;
+        if (typeof enabled !== "boolean") {
+          invalid("enabled must be a boolean");
+        }
+        return Response.json({
+          ok: true,
+          talkBack: await downstream("set talkback", () => deps.setTalkBack(enabled)),
+        });
+      },
+    },
+    {
+      method: "GET",
       path: "/api/font-weight",
       handler: async ({ deps }) =>
         Response.json({
