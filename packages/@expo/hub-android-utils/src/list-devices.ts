@@ -1,7 +1,8 @@
 import { homedir } from "node:os";
 import { runAdbDevices, runAdbEmuAvdName, runAdbGetprop } from "./adb";
 import { readAvdLastBootedAt } from "./avd-usage";
-import { readAvdConfig, runAvdmanagerListAvd } from "./avdmanager";
+import { listAvdCached, resolveAvdHome } from "./avd-list-cache";
+import { readAvdConfig } from "./avdmanager";
 import { type AndroidUtilsError, type AndroidUtilsResult, reportError, result } from "./errors";
 import {
   type ConnectedDevice,
@@ -33,7 +34,7 @@ export async function listDevices(): Promise<AndroidUtilsResult<AndroidDevice[]>
     const avdmanager = resolveAvdmanagerPath(env, home);
     const adb = resolveAdbPath(env, home);
 
-    const avdList = await runAvdmanagerListAvd(avdmanager);
+    const avdList = await listAvdCached(avdmanager, resolveAvdHome(env, home));
     if (avdList.error) return result([], avdList.error);
 
     const adbList = await runAdbDevices(adb);
