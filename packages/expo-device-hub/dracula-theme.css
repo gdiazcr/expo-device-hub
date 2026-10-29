@@ -1,0 +1,117 @@
+/*
+ * Dracula palette for Hub's own UI (https://draculatheme.com/spec), chosen from
+ * the theme select in the left sidebar.
+ *
+ * It re-tints the dark theme instead of defining a third one: the wrapper keeps
+ * `dark-theme`, so every `--expo-theme-*` token still resolves through the
+ * styleguide's dark mapping, and this file only swaps the Radix scales those
+ * tokens point at plus the few tokens the styleguide hard-codes.
+ */
+
+/* Two classes so it outranks the styleguide's `.dark-theme` scales, including its P3 overrides, whatever the import order. */
+.dark-theme.dracula-theme {
+  --dracula-background: #282a36;
+  --dracula-foreground: #f8f8f2;
+  --dracula-cyan: #8be9fd;
+  --dracula-green: #50fa7b;
+  --dracula-orange: #ffb86c;
+  --dracula-purple: #bd93f9;
+  --dracula-red: #ff5555;
+
+  /* Neutrals, from the darker sidebar shade up to the foreground. */
+  --slate-1: #21222c;
+  --slate-2: #2c2e3b;
+  --slate-3: #343746;
+  --slate-4: #3c3f51;
+  --slate-5: #44475a;
+  --slate-6: #4f5269;
+  --slate-7: #5a5e7a;
+  --slate-8: #6272a4;
+  --slate-9: #7a84b0;
+  --slate-10: #9aa2c8;
+  --slate-11: #c7cbe2;
+  --slate-12: var(--dracula-foreground);
+
+  --expo-theme-background-default: var(--dracula-background);
+  --expo-theme-background-screen: var(--slate-1);
+
+  /* The styleguide's primary button is plain white in dark mode. */
+  --expo-theme-button-primary-background: var(--dracula-purple);
+  --expo-theme-button-primary-hover: hsl(from var(--dracula-purple) h s calc(l - 10));
+  --expo-theme-button-primary-icon: var(--slate-1);
+  --expo-theme-button-primary-text: var(--slate-1);
+  --expo-theme-button-secondary-text: var(--dracula-foreground);
+}
+
+/*
+ * Accent scales. Each Radix step keeps its role (tinted surface → border →
+ * solid → text), mixed from one Dracula color: the low steps blend it into the
+ * background and the top step lifts it toward the foreground.
+ */
+.dark-theme.dracula-theme {
+  --blue-1: color-mix(in srgb, var(--dracula-cyan) 4%, var(--dracula-background));
+  --blue-2: color-mix(in srgb, var(--dracula-cyan) 8%, var(--dracula-background));
+  --blue-3: color-mix(in srgb, var(--dracula-cyan) 14%, var(--dracula-background));
+  --blue-4: color-mix(in srgb, var(--dracula-cyan) 20%, var(--dracula-background));
+  --blue-5: color-mix(in srgb, var(--dracula-cyan) 26%, var(--dracula-background));
+  --blue-6: color-mix(in srgb, var(--dracula-cyan) 34%, var(--dracula-background));
+  --blue-7: color-mix(in srgb, var(--dracula-cyan) 44%, var(--dracula-background));
+  --blue-8: color-mix(in srgb, var(--dracula-cyan) 58%, var(--dracula-background));
+  --blue-9: var(--dracula-cyan);
+  --blue-10: color-mix(in srgb, var(--dracula-cyan) 88%, var(--dracula-foreground));
+  --blue-11: var(--dracula-cyan);
+  --blue-12: color-mix(in srgb, var(--dracula-cyan) 40%, var(--dracula-foreground));
+
+  --green-1: color-mix(in srgb, var(--dracula-green) 4%, var(--dracula-background));
+  --green-2: color-mix(in srgb, var(--dracula-green) 8%, var(--dracula-background));
+  --green-3: color-mix(in srgb, var(--dracula-green) 14%, var(--dracula-background));
+  --green-4: color-mix(in srgb, var(--dracula-green) 20%, var(--dracula-background));
+  --green-5: color-mix(in srgb, var(--dracula-green) 26%, var(--dracula-background));
+  --green-6: color-mix(in srgb, var(--dracula-green) 34%, var(--dracula-background));
+  --green-7: color-mix(in srgb, var(--dracula-green) 44%, var(--dracula-background));
+  --green-8: color-mix(in srgb, var(--dracula-green) 58%, var(--dracula-background));
+  --green-9: var(--dracula-green);
+  --green-10: color-mix(in srgb, var(--dracula-green) 88%, var(--dracula-foreground));
+  --green-11: var(--dracula-green);
+  --green-12: color-mix(in srgb, var(--dracula-green) 40%, var(--dracula-foreground));
+
+  /* Warnings use Dracula's orange: its yellow reads as plain text on the dark background. */
+  --amber-1: color-mix(in srgb, var(--dracula-orange) 4%, var(--dracula-background));
+  --amber-2: color-mix(in srgb, var(--dracula-orange) 8%, var(--dracula-background));
+  --amber-3: color-mix(in srgb, var(--dracula-orange) 14%, var(--dracula-background));
+  --amber-4: color-mix(in srgb, var(--dracula-orange) 20%, var(--dracula-background));
+  --amber-5: color-mix(in srgb, var(--dracula-orange) 26%, var(--dracula-background));
+  --amber-6: color-mix(in srgb, var(--dracula-orange) 34%, var(--dracula-background));
+  --amber-7: color-mix(in srgb, var(--dracula-orange) 44%, var(--dracula-background));
+  --amber-8: color-mix(in srgb, var(--dracula-orange) 58%, var(--dracula-background));
+  --amber-9: var(--dracula-orange);
+  --amber-10: color-mix(in srgb, var(--dracula-orange) 88%, var(--dracula-foreground));
+  --amber-11: var(--dracula-orange);
+  --amber-12: color-mix(in srgb, var(--dracula-orange) 40%, var(--dracula-foreground));
+
+  --purple-1: color-mix(in srgb, var(--dracula-purple) 4%, var(--dracula-background));
+  --purple-2: color-mix(in srgb, var(--dracula-purple) 8%, var(--dracula-background));
+  --purple-3: color-mix(in srgb, var(--dracula-purple) 14%, var(--dracula-background));
+  --purple-4: color-mix(in srgb, var(--dracula-purple) 20%, var(--dracula-background));
+  --purple-5: color-mix(in srgb, var(--dracula-purple) 26%, var(--dracula-background));
+  --purple-6: color-mix(in srgb, var(--dracula-purple) 34%, var(--dracula-background));
+  --purple-7: color-mix(in srgb, var(--dracula-purple) 44%, var(--dracula-background));
+  --purple-8: color-mix(in srgb, var(--dracula-purple) 58%, var(--dracula-background));
+  --purple-9: var(--dracula-purple);
+  --purple-10: color-mix(in srgb, var(--dracula-purple) 88%, var(--dracula-foreground));
+  --purple-11: var(--dracula-purple);
+  --purple-12: color-mix(in srgb, var(--dracula-purple) 40%, var(--dracula-foreground));
+
+  --red-1: color-mix(in srgb, var(--dracula-red) 4%, var(--dracula-background));
+  --red-2: color-mix(in srgb, var(--dracula-red) 8%, var(--dracula-background));
+  --red-3: color-mix(in srgb, var(--dracula-red) 14%, var(--dracula-background));
+  --red-4: color-mix(in srgb, var(--dracula-red) 20%, var(--dracula-background));
+  --red-5: color-mix(in srgb, var(--dracula-red) 26%, var(--dracula-background));
+  --red-6: color-mix(in srgb, var(--dracula-red) 34%, var(--dracula-background));
+  --red-7: color-mix(in srgb, var(--dracula-red) 44%, var(--dracula-background));
+  --red-8: color-mix(in srgb, var(--dracula-red) 58%, var(--dracula-background));
+  --red-9: var(--dracula-red);
+  --red-10: color-mix(in srgb, var(--dracula-red) 88%, var(--dracula-foreground));
+  --red-11: var(--dracula-red);
+  --red-12: color-mix(in srgb, var(--dracula-red) 40%, var(--dracula-foreground));
+}

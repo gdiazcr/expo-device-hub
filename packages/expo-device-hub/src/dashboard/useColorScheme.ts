@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { type ColorScheme } from "@expo/hub-components";
 
 /**
- * Tracks the system color scheme (`prefers-color-scheme`) for Hub's own UI.
+ * Tracks the system color scheme (`prefers-color-scheme`) for Hub's own UI,
+ * used while the Hub theme preference is `system` (see `hubTheme.ts`).
  *
- * Hub follows the OS setting and is no longer flipped from within the app — the
- * stream's "Theme" control now drives the *device's* appearance (see
+ * The stream's "Theme" control drives the *device's* appearance (see
  * `@expo/hub-client`'s `setAppearance`), not Hub's.
  */
 export function useColorScheme(): ColorScheme {
