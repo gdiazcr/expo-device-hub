@@ -7,7 +7,7 @@ import {
   type ScreenSize,
 } from "@expo/hub-client";
 import { bg, border } from "../primitives";
-import { type Device } from "./data";
+import { type Device, deviceLabel } from "./data";
 import { DEVICE_TITLE_HEIGHT, DeviceTitle } from "./DeviceTitle";
 import { type ClipboardRequest, ClipboardToaster, useClipboardToast } from "./ClipboardToast";
 import { type DeviceFrameAssets } from "./deviceFrame";
@@ -71,7 +71,7 @@ export function StreamPanel({
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
-  const captureScreenshot = useScreenshotToast(client, device.name);
+  const captureScreenshot = useScreenshotToast(client, deviceLabel(device));
   const setting = client.deviceSettings?.appearance;
   const appearance = setting === "dark" || setting === "light" ? setting : null;
   const appearanceDisabled =

@@ -52,4 +52,16 @@ describe("device title", () => {
     expect(markup).toContain(">Reconnecting</span>");
     expect(markup).not.toContain(">Error</span>");
   });
+
+  test("shows an AVD's display name instead of its identifier", () => {
+    const markup = renderToStaticMarkup(
+      <DeviceTitle
+        device={{ id: "titerra-s10e", name: "titerra-s10e", displayName: "Titerra S10e" }}
+        status="streaming"
+      />,
+    );
+
+    expect(markup).toContain("Titerra S10e");
+    expect(markup).not.toContain(">titerra-s10e<");
+  });
 });

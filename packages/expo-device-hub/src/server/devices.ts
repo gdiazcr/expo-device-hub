@@ -26,6 +26,7 @@ import {
   isSupportedAndroidDevice,
   isSupportedAppleDevice,
 } from "./device-support";
+import { androidDisplayName } from "./android-display-name";
 import { filterSessionDevices } from "./single-device";
 import { type SerializableError, toSerializableError } from "./utility-errors";
 
@@ -57,6 +58,8 @@ export interface HubDevice {
    * time. It is absent when the platform does not provide usage data.
    */
   lastUsedAt?: number;
+  /** Android's `avd.ini.displayname`, when the AVD has one. `name` stays the AVD name actions need. */
+  displayName?: string;
 }
 
 export interface HubDeviceList {
@@ -110,6 +113,7 @@ export async function listAndroidEmulators(): Promise<PlatformDeviceList> {
       .map((device) => ({
         id: device.serial ?? device.name,
         name: device.name,
+        displayName: androidDisplayName(device),
         version: androidVersion(device),
         platform: "android" as const,
         booted: device.booted,

@@ -7,6 +7,7 @@ import {
   type AddDeviceTarget,
   type Device,
   type NewDeviceOptions,
+  deviceLabel,
 } from "./data";
 
 /**
@@ -111,7 +112,7 @@ export function DeviceSection({
           devices.map((device) => (
             <DeviceListItem
               key={device.id}
-              name={device.name}
+              name={deviceLabel(device)}
               version={device.version}
               unsupported={!device.supported}
               usedByAgent={agentDeviceIds.includes(device.id)}

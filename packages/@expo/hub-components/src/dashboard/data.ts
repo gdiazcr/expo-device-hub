@@ -23,7 +23,10 @@ export function isDeviceFrameProfileId(value: unknown): value is DeviceFrameProf
 
 export type Device = {
   id: string;
+  /** The host's identifier for actions: the AVD name on Android, which boot and remove pass to the SDK tools. */
   name: string;
+  /** A friendlier label set on the host, shown instead of `name` when present. */
+  displayName?: string;
   version: string;
   platform: Platform;
   /** Whether the device is currently booted / running. */
@@ -43,6 +46,11 @@ export type Device = {
    */
   lastUsedAt?: number;
 };
+
+/** The label to show for a device; `name` stays the identifier device actions send. */
+export function deviceLabel(device: Pick<Device, "name" | "displayName">): string {
+  return device.displayName ?? device.name;
+}
 
 export type LogEntry = {
   id: string;
